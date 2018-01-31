@@ -17,7 +17,7 @@ public class ServerChat{
 			while(true){
 				Socket socket = listener.accept();
 				System.out.println("Connection accepted");
-				new ServiceChat(socket, ServiceChat.getNbClients());
+				new ServiceChat(socket);
 			}
 		}
 		catch (IOException e){

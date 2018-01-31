@@ -5,27 +5,28 @@ public class ServiceChat extends Thread{
 	public static int nbClients = 0;
 	static final int NBCLIENTSMAX = 21;
 	public static PrintStream outputs[] = new PrintStream[NBCLIENTSMAX];
-	public int id;
 	public Socket socket;
 	public BufferedReader input;
+	public PrintStream output;
+	public String userName;
 	
 	//TODO: Handle disconnections
 	//TODO: Allow pseudonyms
-	public ServiceChat(Socket socket, int id){
+	public ServiceChat(Socket socket){
 		this.socket = socket;
-		this.id = id;
 		start();
 	}
 
 	public void run(){
 		init();
+		setUserName();
 		String message = "";
-		sendMessage("Welcome to this chat, User#" + id + "!", NBCLIENTSMAX, id);
-		sendMessage("User#" + id + " has joined the chat", NBCLIENTSMAX);
+		sendMessage("Welcome to this chat, " + userName + "!", NBCLIENTSMAX, getThreadId());
+		sendMessage(userName + " has joined the chat", NBCLIENTSMAX);
 		while(true){
 			try{
 				message = input.readLine();
-				sendMessage(message, id);
+				sendMessage(message, getThreadId());
 			}
 			catch (IOException e){
 				System.out.println();
@@ -33,19 +34,35 @@ public class ServiceChat extends Thread{
 		}
 	}
 
-	public void init(){
+	public synchronized void init(){
 		try{
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			outputs[id] = new PrintStream(socket.getOutputStream());
+			output = new PrintStream(socket.getOutputStream());
+			outputs[nbClients] = output;
 			nbClients += 1;
 		}
 		catch(IOException e){
-			System.out.println("ID#" + id + ": IOException caught in init()");
+			System.out.println("IOException caught in init()");
 		}
 	}
 
-	public static int getNbClients(){
-		return nbClients;
+	public void setUserName(){
+		output.println("Please state your name");
+		try{
+			userName = input.readLine();
+		}
+		catch (IOException e){
+			System.out.println("IOException caught in setUserName()");
+		}
+	}
+
+	public int getThreadId(){
+		for(int i = 0; i < nbClients; i++){
+			if(this.output == outputs[i]){
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	//TODO: Look if the PrintStream exists before sending
@@ -55,14 +72,15 @@ public class ServiceChat extends Thread{
 			messageFrom = "[SERVER]\t";
 		}
 		else{
-			messageFrom = "[User#" + id + "]\t";
+			messageFrom = "[" + userName + "]\t";
 		}
 		outputs[dest].println(messageFrom.concat(message));
 	}
 	
 	public void sendMessage(String message, int sender){
+		int threadId = getThreadId();
 		for(int i = 0; i < nbClients; i++){
-			if(i != id){
+			if(i != threadId){
 				sendMessage(message, sender, i);
 			}
 		}
