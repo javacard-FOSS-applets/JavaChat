@@ -9,6 +9,8 @@ public class ServiceChat extends Thread{
 	public Socket socket;
 	public BufferedReader input;
 	
+	//TODO: Handle disconnections
+	//TODO: Allow pseudonyms
 	public ServiceChat(Socket socket, int id){
 		this.socket = socket;
 		this.id = id;
@@ -46,6 +48,7 @@ public class ServiceChat extends Thread{
 		return nbClients;
 	}
 
+	//TODO: Look if the PrintStream exists before sending
 	public void sendMessage(String message, int sender, int dest){
 		String messageFrom = "";
 		if(sender == NBCLIENTSMAX){
