@@ -1,15 +1,19 @@
 import java.io.*;
-import java.net.ServerSocket;
+import java.net.*;
 
 public class ServerChat{
-		int port;
+
+	public static void main(String args[]){
+		int port = 4242;
 		ServerSocket listener;
 
-	public ServerChat(int port){
 		try{
-			this.port = port;
+			if(args.length == 1){
+				port = Integer.parseInt(args[0]);
+			}
 			listener = new ServerSocket(port);
-			System.out.println("ServerChat listening on port " + this.port + "...");
+			System.out.println("ServerChat is listening on port " + port + "...");
+
 			while(true){
 				Socket socket = listener.accept();
 				System.out.println("Connection accepted");
@@ -19,12 +23,5 @@ public class ServerChat{
 		catch (IOException e){
 			System.out.println("IOException raised: connection issue");
 		}
-	}
-	public ServerChat(){
-		this(4242);
-	}
-
-	public log(String message){
-		System.out.println(message);
 	}
 }
