@@ -26,12 +26,34 @@ public class ServiceChat extends Thread{
 		while(true){
 			try{
 				message = input.readLine();
+				if(message == null){
+					disconnect();
+				}
 				sendMessage(message, getThreadId());
 			}
 			catch (IOException e){
 				System.out.println();
 			}
 		}
+	}
+
+	public synchronized void disconnect(){
+		try{
+			socket.close();
+		}
+		catch (IOException e){
+			System.out.println("IOException caught in disconnect()");
+		}
+		popUser();
+		nbClients -= 1;
+	}
+
+	public void popUser(){
+		threadId = getThreadId();
+		for(int i = threadId; i < nbClients; i++){
+			outputs[i] = outputs[i+1];
+		}
+		outputs[nbClients - 1] = null;
 	}
 
 	public synchronized void init(){
