@@ -49,16 +49,16 @@ public class ServiceChat extends Thread{
 	public void sendMessage(String message, int sender, int dest){
 		String messageFrom = "";
 		if(sender == NBCLIENTSMAX){
-			messageFrom = "[SERVER] ";
+			messageFrom = "[SERVER]\t";
 		}
 		else{
-			messageFrom = "[User#" + id + "] ";
+			messageFrom = "[User#" + id + "]\t";
 		}
 		outputs[dest].println(messageFrom.concat(message));
 	}
 	
 	public void sendMessage(String message, int sender){
-		for(int i = 0; i < NBCLIENTSMAX; i++){
+		for(int i = 0; i < nbClients; i++){
 			if(i != id){
 				sendMessage(message, sender, i);
 			}
