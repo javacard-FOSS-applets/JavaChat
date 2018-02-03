@@ -10,8 +10,6 @@ public class ServiceChat extends Thread{
 	public PrintStream output;
 	public String userName;
 	
-	//TODO: Handle disconnections
-	//TODO: Allow pseudonyms
 	public ServiceChat(Socket socket){
 		this.socket = socket;
 		start();
@@ -28,6 +26,7 @@ public class ServiceChat extends Thread{
 				message = input.readLine();
 				if(message == null){
 					disconnect();
+					sendMessage(userName + " has left the chat", NBCLIENTSMAX);
 					return;
 				}
 				sendMessage(message, getThreadId());
@@ -41,7 +40,7 @@ public class ServiceChat extends Thread{
 	public synchronized void disconnect(){
 		try{
 			socket.close();
-			System.out.println("Connection closed")
+			System.out.println("Connection closed");
 		}
 		catch (IOException e){
 			System.out.println("IOException caught in disconnect()");
@@ -71,7 +70,7 @@ public class ServiceChat extends Thread{
 	}
 
 	public void setUserName(){
-		output.println("Please state your name");
+		output.println("Please state your name\r");
 		try{
 			userName = input.readLine();
 		}
@@ -89,16 +88,15 @@ public class ServiceChat extends Thread{
 		return -1;
 	}
 
-	//TODO: Look if the PrintStream exists before sending
 	public void sendMessage(String message, int sender, int dest){
 		String messageFrom = "";
 		if(sender == NBCLIENTSMAX){
-			messageFrom = "[SERVER]\t";
+			messageFrom = "[SERVER] ";
 		}
 		else{
-			messageFrom = "[" + userName + "]\t";
+			messageFrom = "[" + userName + "] ";
 		}
-		outputs[dest].println(messageFrom.concat(message));
+		outputs[dest].println(messageFrom.concat(message)+"\r");
 	}
 	
 	public void sendMessage(String message, int sender){
