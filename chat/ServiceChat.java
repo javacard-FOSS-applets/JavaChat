@@ -28,6 +28,7 @@ public class ServiceChat extends Thread{
 				message = input.readLine();
 				if(message == null){
 					disconnect();
+					return;
 				}
 				sendMessage(message, getThreadId());
 			}
@@ -40,6 +41,7 @@ public class ServiceChat extends Thread{
 	public synchronized void disconnect(){
 		try{
 			socket.close();
+			System.out.println("Connection closed")
 		}
 		catch (IOException e){
 			System.out.println("IOException caught in disconnect()");
@@ -49,8 +51,8 @@ public class ServiceChat extends Thread{
 	}
 
 	public void popUser(){
-		threadId = getThreadId();
-		for(int i = threadId; i < nbClients; i++){
+		int threadId = getThreadId();
+		for(int i = threadId; i < nbClients - 1; i++){
 			outputs[i] = outputs[i+1];
 		}
 		outputs[nbClients - 1] = null;
