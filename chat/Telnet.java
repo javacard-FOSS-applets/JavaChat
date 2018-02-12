@@ -9,7 +9,10 @@ public class Telnet extends Thread{
 
 	public Telnet(String[] args){
 		try{
-			s = new Socket(args[0], Integer.parseInt(args[1]));
+			if(args.length == 2){
+				s = new Socket(args[0], Integer.parseInt(args[1]));	
+			}
+			s = new Socket("localhost", 2222);
 			initInputOutput(s);
 			running = true;
 			start();

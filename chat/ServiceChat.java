@@ -132,6 +132,7 @@ public class ServiceChat extends Thread{
 		}
 		else{
 			messageFrom = "<" + userName + "> ";
+			System.out.println("Message transmitted: " + userName + " -> " + usersList[dest]);
 		}
 		outputs[dest].println(messageFrom.concat(message)+"\r");
 	}

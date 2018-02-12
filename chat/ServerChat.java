@@ -4,7 +4,7 @@ import java.net.*;
 public class ServerChat{
 
 	public static void main(String args[]){
-		int port = 4242;
+		int port = 2222;
 		ServerSocket listener;
 
 		try{
@@ -12,10 +12,12 @@ public class ServerChat{
 				port = Integer.parseInt(args[0]);
 			}
 			listener = new ServerSocket(port);
-			System.out.println("ServerChat is listening on port " + port + "...");
+			System.out.println("ServerChat is listening on port " + port);
 
 			while(true){
+				System.out.println("Listening...");
 				Socket socket = listener.accept();
+				System.out.println("Trying to connect...");
 				if(ServiceChat.nbClients < ServiceChat.NBCLIENTSMAX){
 					System.out.println("Connection accepted");
 					new ServiceChat(socket);
