@@ -5,11 +5,13 @@ public class Telnet extends Thread{
 	Socket s;
 	BufferedReader inputConsole, inputNetwork;
 	PrintStream outputConsole, outputNetwork;
+	public boolean running;
 
 	public Telnet(String[] args){
 		try{
 			s = new Socket(args[0], Integer.parseInt(args[1]));
 			initInputOutput(s);
+			running = true;
 			start();
 			listenConsole();
 		}
@@ -48,7 +50,7 @@ public class Telnet extends Thread{
 
 	public void listenConsole(){
 		String consoleMessage = "";
-		while(true){
+		while(running){
 			try{
 				consoleMessage = inputConsole.readLine();
 				outputNetwork.println(consoleMessage);
@@ -61,14 +63,23 @@ public class Telnet extends Thread{
 
 	public void listenNetwork(){
 		String networkMessage = "";
-		while(true){
+		while(running){
 			try{
 				networkMessage = inputNetwork.readLine();
-				outputConsole.println(networkMessage);
+				if(networkMessage == null){
+					disconnect();
+				}
+				else{
+					outputConsole.println(networkMessage);
+				}
 			}
 			catch (IOException e){
 				outputNetwork.println("IOException caught in listenNetwork()\r");
 			}
 		}
+	}
+
+	public void disconnect(){
+		running = false;
 	}
 }

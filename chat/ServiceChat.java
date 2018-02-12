@@ -11,6 +11,7 @@ public class ServiceChat extends Thread{
 	public BufferedReader input;
 	public PrintStream output;
 	public String userName;
+	public boolean running;
 	
 	public ServiceChat(Socket socket){
 		this.socket = socket;
@@ -26,18 +27,19 @@ public class ServiceChat extends Thread{
 		String message = "";
 		sendMessage("Welcome to this chat, " + userName + "!", NBCLIENTSMAX, getThreadId());
 		sendMessage(userName + " has joined the chat", NBCLIENTSMAX);
-		while(true){
+		while(running){
 			try{
 				message = input.readLine();
 				if(message == null){
 					disconnect();
-					return;
-				}
-				if(message.startsWith("/")){
-					doCommand(message);
 				}
 				else{
-					sendMessage(message, getThreadId());
+					if(message.startsWith("/")){
+						doCommand(message);
+					}
+					else{
+						sendMessage(message, getThreadId());
+					}
 				}
 			}
 			catch (IOException e){
@@ -57,6 +59,7 @@ public class ServiceChat extends Thread{
 		popUser();
 		nbClients -= 1;
 		sendMessage(userName + " has left the chat", NBCLIENTSMAX);
+		running = false;
 	}
 
 	public void popUser(){
@@ -75,6 +78,7 @@ public class ServiceChat extends Thread{
 			output = new PrintStream(socket.getOutputStream());
 			outputs[nbClients] = output;
 			nbClients += 1;
+			running = true;
 		}
 		catch(IOException e){
 			System.out.println("IOException caught in init()");
@@ -159,9 +163,9 @@ public class ServiceChat extends Thread{
 		switch(commandType){
 			case "/list": listUsers();
 				break;
-			case "/quit": output.println("Command /quit");
+			case "/quit": disconnect();
 				break;
-			default: output.println("Unknown command");
+			default: output.println("Unknown command\r");
 				break;
 		}
 	}
