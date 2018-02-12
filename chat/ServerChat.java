@@ -16,7 +16,7 @@ public class ServerChat{
 
 			while(true){
 				Socket socket = listener.accept();
-				if(ServiceChat.nbClients >= ServiceChat.NBCLIENTSMAX){
+				if(ServiceChat.nbClients < ServiceChat.NBCLIENTSMAX){
 					System.out.println("Connection accepted");
 					new ServiceChat(socket);
 				}

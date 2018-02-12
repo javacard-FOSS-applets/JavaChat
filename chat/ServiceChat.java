@@ -23,6 +23,7 @@ public class ServiceChat extends Thread{
 
 	public void run(){
 		init();
+		System.out.println(nbClients + " client(s) connected");
 		setUserName();
 		String message = "";
 		sendMessage("Welcome to this chat, " + userName + "!", NBCLIENTSMAX, getThreadId());
@@ -49,6 +50,7 @@ public class ServiceChat extends Thread{
 	}
 
 	public synchronized void disconnect(){
+		sendMessage("Bye " + userName + "!", NBCLIENTSMAX, getThreadId());
 		try{
 			socket.close();
 			System.out.println("Connection closed");
@@ -60,6 +62,7 @@ public class ServiceChat extends Thread{
 		nbClients -= 1;
 		sendMessage(userName + " has left the chat", NBCLIENTSMAX);
 		running = false;
+		System.out.println(nbClients + " client(s) connected");
 	}
 
 	public void popUser(){
