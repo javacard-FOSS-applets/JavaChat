@@ -1,13 +1,13 @@
 import java.io.*;
 import java.net.*;
 
-public class Telnet extends Thread{
+public class ClientChat extends Thread{
 	Socket s;
 	BufferedReader inputConsole, inputNetwork;
 	PrintStream outputConsole, outputNetwork;
-	public boolean running;
+	boolean running;
 
-	public Telnet(String[] args){
+	public ClientChat(String[] args){
 		try{
 			if(args.length == 2){
 				s = new Socket(args[0], Integer.parseInt(args[1]));	
@@ -31,7 +31,7 @@ public class Telnet extends Thread{
 		new Telnet(args);
 	}
 
-	public void initInputOutput(Socket s){
+	void initInputOutput(Socket s){
 		// Initialize IO console
 		try{
 			inputConsole = new BufferedReader(new InputStreamReader(System.in));
@@ -51,7 +51,7 @@ public class Telnet extends Thread{
 		}
 	}
 
-	public void listenConsole(){
+	void listenConsole(){
 		String consoleMessage = "";
 		while(running){
 			try{
@@ -64,7 +64,7 @@ public class Telnet extends Thread{
 		}
 	}
 
-	public void listenNetwork(){
+	void listenNetwork(){
 		String networkMessage = "";
 		while(running){
 			try{
@@ -82,7 +82,7 @@ public class Telnet extends Thread{
 		}
 	}
 
-	public void disconnect(){
+	void disconnect(){
 		running = false;
 	}
 }

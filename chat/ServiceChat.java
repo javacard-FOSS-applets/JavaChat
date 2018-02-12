@@ -1,25 +1,26 @@
 import java.io.*;
 import java.net.*;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class ServiceChat extends Thread{
 	public static int nbClients = 0;
 	static final int NBCLIENTSMAX = 21;
-	public static PrintStream outputs[] = new PrintStream[NBCLIENTSMAX];
-	public static String usersList[] = new String[NBCLIENTSMAX];
-	public Socket socket;
-	public BufferedReader input;
-	public PrintStream output;
-	public String userName;
-	public boolean running;
+	static PrintStream outputs[] = new PrintStream[NBCLIENTSMAX];
+	static String usersList[] = new String[NBCLIENTSMAX];
+	Socket socket;
+	BufferedReader input;
+	PrintStream output;
+	String userName;
+	boolean running;
 	
 	public ServiceChat(Socket socket){
 		this.socket = socket;
 		start();
 	}
 
-	// TODO: handle instructions for disconnection
-	// TODO: users database
+	//////////////////////////
+	// CONNECTION HANDLING //
+	////////////////////////
 
 	public void run(){
 		init();
@@ -49,33 +50,7 @@ public class ServiceChat extends Thread{
 		}
 	}
 
-	public synchronized void disconnect(){
-		sendMessage("Bye " + userName + "!", NBCLIENTSMAX, getThreadId());
-		try{
-			socket.close();
-			System.out.println("Connection closed");
-		}
-		catch (IOException e){
-			System.out.println("IOException caught in disconnect()");
-		}
-		popUser();
-		nbClients -= 1;
-		sendMessage(userName + " has left the chat", NBCLIENTSMAX);
-		running = false;
-		System.out.println(nbClients + " client(s) connected");
-	}
-
-	public void popUser(){
-		int threadId = getThreadId();
-		for(int i = threadId; i < nbClients - 1; i++){
-			outputs[i] = outputs[i+1];
-			usersList[i] = usersList[i+1];
-		}
-		outputs[nbClients - 1] = null;
-		usersList[nbClients -1] = null;
-	}
-
-	public synchronized void init(){
+	synchronized void init(){
 		try{
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			output = new PrintStream(socket.getOutputStream());
@@ -88,7 +63,7 @@ public class ServiceChat extends Thread{
 		}
 	}
 
-	public void setUserName(){
+	void setUserName(){
 		output.println("Please state your name\r");
 		try{
 			userName = input.readLine();
@@ -107,7 +82,41 @@ public class ServiceChat extends Thread{
 		}
 	}
 
-	public int getThreadId(){
+	/////////////////////////////
+	// DISCONNECTION HANDLING //
+	///////////////////////////
+
+	public synchronized void disconnect(){
+		sendMessage("Bye " + userName + "!", NBCLIENTSMAX, getThreadId());
+		try{
+			socket.close();
+			System.out.println("Connection closed");
+		}
+		catch (IOException e){
+			System.out.println("IOException caught in disconnect()");
+		}
+		popUser();
+		nbClients -= 1;
+		sendMessage(userName + " has left the chat", NBCLIENTSMAX);
+		running = false;
+		System.out.println(nbClients + " client(s) connected");
+	}
+
+	void popUser(){
+		int threadId = getThreadId();
+		for(int i = threadId; i < nbClients - 1; i++){
+			outputs[i] = outputs[i+1];
+			usersList[i] = usersList[i+1];
+		}
+		outputs[nbClients - 1] = null;
+		usersList[nbClients -1] = null;
+	}
+
+	//////////////
+	// GETTERS //
+	////////////
+
+	int getThreadId(){
 		for(int i = 0; i < nbClients; i++){
 			if(this.output == outputs[i]){
 				return i;
@@ -116,7 +125,7 @@ public class ServiceChat extends Thread{
 		return -1;
 	}
 
-	public int getUserId(String userName){
+	int getUserId(String userName){
 		for(int i = 0; i < nbClients; i++){
 			if(usersList[i] != null && usersList[i].equals(userName)){
 				return i;
@@ -125,7 +134,11 @@ public class ServiceChat extends Thread{
 		return -1;
 	}
 
-	public void sendMessage(String message, int sender, int dest){
+	//////////////////////
+	// MESSAGE SENDING //
+	////////////////////
+
+	void sendMessage(String message, int sender, int dest){
 		String messageFrom = "";
 		if(sender == NBCLIENTSMAX){
 			messageFrom = "[SERVER] ";
@@ -137,7 +150,7 @@ public class ServiceChat extends Thread{
 		outputs[dest].println(messageFrom.concat(message)+"\r");
 	}
 	
-	public void sendMessage(String message, int sender){
+	void sendMessage(String message, int sender){
 		int threadId = getThreadId();
 		for(int i = 0; i < nbClients; i++){
 			if(i != threadId){
@@ -146,7 +159,7 @@ public class ServiceChat extends Thread{
 		}
 	}
 
-	public void sendMessage(String message, String destUserName){
+	void sendMessage(String message, String destUserName){
 		String privMessage = "(private)".concat(message);
 		for(int i = 0; i < nbClients; i++){
 			if(usersList[i].equals(destUserName)){
@@ -157,13 +170,11 @@ public class ServiceChat extends Thread{
 		output.println("User " + destUserName + "does not exist...\r");
 	}
 
-	public void listUsers(){
-		for(int i = 0; i < nbClients; i++){
-			output.println(usersList[i]);
-		}
-	}
+	/////////////////////////////
+	// CHAT COMMANDS HANDLING //
+	///////////////////////////
 
-	public void doCommand(String command){
+	void doCommand(String command){
 		StringTokenizer tokens = new StringTokenizer(command);
 		switch(tokens.nextToken()){
 			case "/list":
@@ -183,6 +194,12 @@ public class ServiceChat extends Thread{
 			default: 
 				output.println("Unknown command\r");
 				break;
+		}
+	}
+
+	void listUsers(){
+		for(int i = 0; i < nbClients; i++){
+			output.println(usersList[i]);
 		}
 	}
 }
