@@ -16,8 +16,16 @@ public class ServerChat{
 
 			while(true){
 				Socket socket = listener.accept();
-				System.out.println("Connection accepted");
-				new ServiceChat(socket);
+				if(ServiceChat.nbClients >= ServiceChat.NBCLIENTSMAX){
+					System.out.println("Connection accepted");
+					new ServiceChat(socket);
+				}
+				else{
+					System.out.println("Connection refused: max number of connections reached");
+					PrintStream output = new PrintStream(socket.getOutputStream());
+					output.println("Maximum number of connections reached... Please wait for someone to disconnect\r");
+					socket.close();
+				}
 			}
 		}
 		catch (IOException e){
