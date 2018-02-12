@@ -14,7 +14,7 @@ public class Telnet extends Thread{
 			listenConsole();
 		}
 		catch (IOException e){
-			System.out.println("IOException caught in Telnet constructor");
+			System.out.println("IOException caught in Telnet constructor\r");
 		}
 	}
 
@@ -33,7 +33,7 @@ public class Telnet extends Thread{
 			outputConsole = new PrintStream(System.out);
 		}
 		catch (Exception e){
-			System.out.println("Exception caught initializing IO console");
+			System.out.println("Exception caught initializing IO console\r");
 		}
 
 		// Initialize IO network
@@ -42,7 +42,7 @@ public class Telnet extends Thread{
 			outputNetwork = new PrintStream(s.getOutputStream());
 		}
 		catch (IOException e){
-			System.out.println("IOException caught initializing IO network");
+			System.out.println("IOException caught initializing IO network\r");
 		}
 	}
 
@@ -54,7 +54,7 @@ public class Telnet extends Thread{
 				outputNetwork.println(consoleMessage);
 			}
 			catch (IOException e){
-				outputConsole.println("IOException caught in listenConsole()");
+				outputConsole.println("IOException caught in listenConsole()\r");
 			}
 		}
 	}
@@ -67,7 +67,7 @@ public class Telnet extends Thread{
 				outputConsole.println(networkMessage);
 			}
 			catch (IOException e){
-				outputNetwork.println("IOException caught in listenNetwork()");
+				outputNetwork.println("IOException caught in listenNetwork()\r");
 			}
 		}
 	}

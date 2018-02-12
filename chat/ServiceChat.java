@@ -5,6 +5,7 @@ public class ServiceChat extends Thread{
 	public static int nbClients = 0;
 	static final int NBCLIENTSMAX = 21;
 	public static PrintStream outputs[] = new PrintStream[NBCLIENTSMAX];
+	public static String usersList[] = new String[NBCLIENTSMAX];
 	public Socket socket;
 	public BufferedReader input;
 	public PrintStream output;
@@ -16,6 +17,7 @@ public class ServiceChat extends Thread{
 	}
 
 	// TODO: handle instructions for disconnection
+	// TODO: users database
 
 	public void run(){
 		init();
@@ -28,7 +30,6 @@ public class ServiceChat extends Thread{
 				message = input.readLine();
 				if(message == null){
 					disconnect();
-					sendMessage(userName + " has left the chat", NBCLIENTSMAX);
 					return;
 				}
 				sendMessage(message, getThreadId());
@@ -49,14 +50,17 @@ public class ServiceChat extends Thread{
 		}
 		popUser();
 		nbClients -= 1;
+		sendMessage(userName + " has left the chat", NBCLIENTSMAX);
 	}
 
 	public void popUser(){
 		int threadId = getThreadId();
 		for(int i = threadId; i < nbClients - 1; i++){
 			outputs[i] = outputs[i+1];
+			usersList[i] = usersList[i+1];
 		}
 		outputs[nbClients - 1] = null;
+		usersList[nbClients -1] = null;
 	}
 
 	public synchronized void init(){
@@ -75,6 +79,15 @@ public class ServiceChat extends Thread{
 		output.println("Please state your name\r");
 		try{
 			userName = input.readLine();
+			if(userName == ""){
+				output.println("You need to identify yourself!\r");
+				setUserName();
+			}
+			if(getUserId(userName) != -1){
+				output.println("This user name is already being used on the chat... You need to pick another one.\r");
+				setUserName();
+			}
+			usersList[getThreadId()] = userName;
 		}
 		catch (IOException e){
 			System.out.println("IOException caught in setUserName()");
@@ -84,6 +97,15 @@ public class ServiceChat extends Thread{
 	public int getThreadId(){
 		for(int i = 0; i < nbClients; i++){
 			if(this.output == outputs[i]){
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public int getUserId(String userName){
+		for(int i = 0; i < nbClients; i++){
+			if(usersList[i] != null && usersList[i].equals(userName)){
 				return i;
 			}
 		}
@@ -106,6 +128,15 @@ public class ServiceChat extends Thread{
 		for(int i = 0; i < nbClients; i++){
 			if(i != threadId){
 				sendMessage(message, sender, i);
+			}
+		}
+	}
+
+	public void privateMessage(String message, String destUserName){
+		String privMessage = "(private) ".concat(message);
+		for(int i = 0; i < nbClients; i++){
+			if(usersList[i] == destUserName){
+				sendMessage(privMessage, getThreadId(), i);
 			}
 		}
 	}
