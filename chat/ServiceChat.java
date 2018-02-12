@@ -165,18 +165,22 @@ public class ServiceChat extends Thread{
 	public void doCommand(String command){
 		StringTokenizer tokens = new StringTokenizer(command);
 		switch(tokens.nextToken()){
-			case "/list": listUsers();
+			case "/list":
+				listUsers();
 				break;
-			case "/quit": disconnect();
+			case "/quit":
+				disconnect();
 				break;
-			case "/msg": String destUser = tokens.nextToken();
+			case "/msg":
+				String destUser = tokens.nextToken();
 				String message = "";
 				while(tokens.hasMoreTokens()){
 					message += " ".concat(tokens.nextToken());
 				}
 				sendMessage(message, destUser);
 				break;
-			default: output.println("Unknown command\r");
+			default: 
+				output.println("Unknown command\r");
 				break;
 		}
 	}
