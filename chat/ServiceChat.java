@@ -146,7 +146,7 @@ public class ServiceChat extends Thread{
 	}
 
 	public void sendMessage(String message, String destUserName){
-		String privMessage = "(private) ".concat(message);
+		String privMessage = "(private)".concat(message);
 		for(int i = 0; i < nbClients; i++){
 			if(usersList[i].equals(destUserName)){
 				sendMessage(privMessage, getThreadId(), i);
