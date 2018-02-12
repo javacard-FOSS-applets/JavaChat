@@ -46,3 +46,45 @@ C c2 = new C(2);
 C c3 = new C(3);
 System.out.println(c1.attr)	// ==> 3
 ```
+
+##
+
+```java
+import java.net.*;
+
+public class Telnet extends Thread{
+	Socket s;
+	BufferedReader inputConsole, inputNetwork;
+	PrintStream outputConsole, outputNetwork;
+
+	public Telnet(String[] args) throws Exception{
+		s = new Socket(args[0], Integer.parseInt(args[1]));
+		initInputOutput(s);
+		start();
+		listenConsole();
+	}
+
+	public void run(){
+		listenNetwork();
+	}
+
+	public static void main(String[] args) throws Exception{
+		new Telnet(args);
+	}
+}
+```
+```bash
+$ java Telnet <host> <port>
+```
+
+## Commandes à implémenter
+
+* list user
+* disco
+* un utilisateur en particulier
+
+### Types de données envoyées
+
+* Message
+* Commande
+* Fichier

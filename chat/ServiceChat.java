@@ -15,6 +15,8 @@ public class ServiceChat extends Thread{
 		start();
 	}
 
+	// TODO: handle instructions for disconnection
+
 	public void run(){
 		init();
 		setUserName();
