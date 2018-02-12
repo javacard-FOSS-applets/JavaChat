@@ -131,7 +131,7 @@ public class ServiceChat extends Thread{
 			messageFrom = "[SERVER] ";
 		}
 		else{
-			messageFrom = "[" + userName + "] ";
+			messageFrom = "<" + userName + "> ";
 		}
 		outputs[dest].println(messageFrom.concat(message)+"\r");
 	}
@@ -145,13 +145,15 @@ public class ServiceChat extends Thread{
 		}
 	}
 
-	public void privateMessage(String message, String destUserName){
+	public void sendMessage(String message, String destUserName){
 		String privMessage = "(private) ".concat(message);
 		for(int i = 0; i < nbClients; i++){
-			if(usersList[i] == destUserName){
+			if(usersList[i].equals(destUserName)){
 				sendMessage(privMessage, getThreadId(), i);
+				return;
 			}
 		}
+		output.println("User " + destUserName + "does not exist...\r");
 	}
 
 	public void listUsers(){
@@ -162,11 +164,17 @@ public class ServiceChat extends Thread{
 
 	public void doCommand(String command){
 		StringTokenizer tokens = new StringTokenizer(command);
-		String commandType = tokens.nextToken();
-		switch(commandType){
+		switch(tokens.nextToken()){
 			case "/list": listUsers();
 				break;
 			case "/quit": disconnect();
+				break;
+			case "/msg": String destUser = tokens.nextToken();
+				String message = "";
+				while(tokens.hasMoreTokens()){
+					message += " ".concat(tokens.nextToken());
+				}
+				sendMessage(message, destUser);
 				break;
 			default: output.println("Unknown command\r");
 				break;
