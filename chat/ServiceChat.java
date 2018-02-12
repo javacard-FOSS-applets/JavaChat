@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.StringTokenizer;
 
 public class ServiceChat extends Thread{
 	public static int nbClients = 0;
@@ -32,7 +33,12 @@ public class ServiceChat extends Thread{
 					disconnect();
 					return;
 				}
-				sendMessage(message, getThreadId());
+				if(message.startsWith("/")){
+					doCommand(message);
+				}
+				else{
+					sendMessage(message, getThreadId());
+				}
 			}
 			catch (IOException e){
 				System.out.println();
@@ -138,6 +144,25 @@ public class ServiceChat extends Thread{
 			if(usersList[i] == destUserName){
 				sendMessage(privMessage, getThreadId(), i);
 			}
+		}
+	}
+
+	public void listUsers(){
+		for(int i = 0; i < nbClients; i++){
+			output.println(usersList[i]);
+		}
+	}
+
+	public void doCommand(String command){
+		StringTokenizer tokens = new StringTokenizer(command);
+		String commandType = tokens.nextToken();
+		switch(commandType){
+			case "/list": listUsers();
+				break;
+			case "/quit": output.println("Command /quit");
+				break;
+			default: output.println("Unknown command");
+				break;
 		}
 	}
 }
