@@ -12,8 +12,6 @@ public class ServiceChat extends Thread{
 	PrintStream output;
 	String userName;
 	boolean running;
-	
-	// TODO: change all output.println() from server to sendMessage()
 
 	public ServiceChat(Socket socket){
 		this.socket = socket;
@@ -83,7 +81,7 @@ public class ServiceChat extends Thread{
 			}
 		}
 		else{
-			output.println("You do not have a recorded password attached to your login yet.");
+			sendMessage("You do not have a recorded password attached to your login yet.", NBCLIENTSMAX, getThreadId());
 			setPassword();
 			ret = true;
 		}
@@ -91,15 +89,15 @@ public class ServiceChat extends Thread{
 	}
 
 	void setUserName(){
-		output.println("Please state your name\r");
+		sendMessage("Please state your name", NBCLIENTSMAX, getThreadId());
 		try{
 			userName = input.readLine();
 			if(userName == ""){
-				output.println("You need to identify yourself!\r");
+				sendMessage("You need to identify yourself!", NBCLIENTSMAX, getThreadId());
 				setUserName();
 			}
 			if(getUserId(userName) != -1){
-				output.println("This user name is already being used on the chat... You need to pick another one.\r");
+				sendMessage("This user name is already being used on the chat... You need to pick another one", NBCLIENTSMAX, getThreadId());
 				setUserName();
 			}
 			usersList[getThreadId()] = userName;
@@ -111,16 +109,16 @@ public class ServiceChat extends Thread{
 
 	void setPassword(){
 		String password = "";
-		output.println("Please type in your new password");
+		sendMessage("Please type in your new password", NBCLIENTSMAX, getThreadId());
 		try{
 			password = input.readLine();
-			output.println("Please confirm password");
+			sendMessage("Please confirm password", NBCLIENTSMAX, getThreadId());
 			if(password.equals(input.readLine())){
 				recordCredentials(password);
-				output.println("Your password has properly been changed");
+				sendMessage("Your password has properly been changed", NBCLIENTSMAX, getThreadId());
 			}
 			else{
-				output.println("The two passwords don't match. You need to type in the same password twice.");
+				sendMessage("The two passwords don't match. You need to type in the same password twice.", NBCLIENTSMAX, getThreadId());
 				setPassword();
 			}
 		}
@@ -179,7 +177,7 @@ public class ServiceChat extends Thread{
 		}
 
 		while(tries > 0){
-			output.println("Please type in your password");
+			sendMessage("Please type in your password", NBCLIENTSMAX, getThreadId());
 			try{
 				tentative = input.readLine();
 				if(password.equals(tentative)){
@@ -189,10 +187,10 @@ public class ServiceChat extends Thread{
 				else{
 					tries -= 1;
 					if(tries > 0){
-						output.println("You have entered the wrong login/password combination. Try again (remaining " + tries + " tries)");
+						sendMessage("You have entered the wrong login/password combination. Try again (remaining " + tries + " tries)", NBCLIENTSMAX, getThreadId());
 					}
 					else{
-						output.println("Too many wrong tries");
+						sendMessage("Too many wrong tries", NBCLIENTSMAX, getThreadId());
 					}
 				}
 			}
@@ -296,7 +294,7 @@ public class ServiceChat extends Thread{
 				return;
 			}
 		}
-		output.println("User " + destUserName + "does not exist...\r");
+		sendMessage("User " + destUserName + "does not exist...", NBCLIENTSMAX, getThreadId());
 	}
 
 	/////////////////////////////
@@ -320,15 +318,17 @@ public class ServiceChat extends Thread{
 				}
 				sendMessage(message, destUser);
 				break;
-			default: 
-				output.println("Unknown command\r");
+			default:
+				sendMessage("Unknown command", NBCLIENTSMAX, getThreadId());
 				break;
 		}
 	}
 
 	void listUsers(){
+		String users = "Users currently connected";
 		for(int i = 0; i < nbClients; i++){
-			output.println(usersList[i]);
+			users += "\n".concat(usersList[i]);
 		}
+		sendMessage(users, NBCLIENTSMAX, getThreadId());
 	}
 }
