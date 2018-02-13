@@ -19,7 +19,7 @@ public class ClientChat extends Thread{
 			listenConsole();
 		}
 		catch (IOException e){
-			System.out.println("IOException caught in Telnet constructor\r");
+			System.out.println("IOException caught in ClientChat constructor\r");
 		}
 	}
 
@@ -28,7 +28,7 @@ public class ClientChat extends Thread{
 	}
 
 	public static void main(String[] args){
-		new Telnet(args);
+		new ClientChat(args);
 	}
 
 	void initInputOutput(Socket s){

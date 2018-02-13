@@ -13,6 +13,8 @@ public class ServiceChat extends Thread{
 	String userName;
 	boolean running;
 	
+	// TODO: change all output.println() from server to sendMessage()
+
 	public ServiceChat(Socket socket){
 		this.socket = socket;
 		start();
@@ -25,27 +27,28 @@ public class ServiceChat extends Thread{
 	public void run(){
 		init();
 		System.out.println(nbClients + " client(s) connected");
-		setUserName();
-		String message = "";
-		sendMessage("Welcome to this chat, " + userName + "!", NBCLIENTSMAX, getThreadId());
-		sendMessage(userName + " has joined the chat", NBCLIENTSMAX);
-		while(running){
-			try{
-				message = input.readLine();
-				if(message == null){
-					disconnect();
-				}
-				else{
-					if(message.startsWith("/")){
-						doCommand(message);
+		if(authentication()){
+			String message = "";
+			sendMessage("Welcome to this chat, " + userName + "!", NBCLIENTSMAX, getThreadId());
+			sendMessage(userName + " has joined the chat", NBCLIENTSMAX);
+			while(running){
+				try{
+					message = input.readLine();
+					if(message == null){
+						disconnect();
 					}
 					else{
-						sendMessage(message, getThreadId());
+						if(message.startsWith("/")){
+							doCommand(message);
+						}
+						else{
+							sendMessage(message, getThreadId());
+						}
 					}
 				}
-			}
-			catch (IOException e){
-				System.out.println();
+				catch (IOException e){
+					System.out.println();
+				}
 			}
 		}
 	}
@@ -61,6 +64,30 @@ public class ServiceChat extends Thread{
 		catch(IOException e){
 			System.out.println("IOException caught in init()");
 		}
+	}
+
+	/////////////////////
+	// AUTHENTICATION //
+	///////////////////
+
+	boolean authentication(){
+		boolean ret = false;
+		int credsIndex = -1;
+		setUserName();
+		if((credsIndex = hasCredentials()) != 0){
+			if(!checkPassword(credsIndex)){
+				disconnect(false);
+			}
+			else{
+				ret = true;
+			}
+		}
+		else{
+			output.println("You do not have a recorded password attached to your login yet.");
+			setPassword();
+			ret = true;
+		}
+		return ret;
 	}
 
 	void setUserName(){
@@ -82,12 +109,108 @@ public class ServiceChat extends Thread{
 		}
 	}
 
+	void setPassword(){
+		String password = "";
+		output.println("Please type in your new password");
+		try{
+			password = input.readLine();
+			output.println("Please confirm password");
+			if(password.equals(input.readLine())){
+				recordCredentials(password);
+				output.println("Your password has properly been changed");
+			}
+			else{
+				output.println("The two passwords don't match. You need to type in the same password twice.");
+				setPassword();
+			}
+		}
+		catch(IOException e){
+			System.out.println("IOException caught in setPassword()");
+		}
+	}
+
+	synchronized void recordCredentials(String password){
+		try{
+			PrintWriter recorder = new PrintWriter(new BufferedWriter(new FileWriter("credentials", true)));
+			recorder.write(userName + ":" + password + "\n");
+			recorder.close();
+		}
+		catch(IOException e){
+			System.out.println("IOException caught in recordCredentials");
+		}
+	}
+
+	int hasCredentials(){
+		int index = 0;
+		int count = 0;
+		String credentials = "";
+		try{
+			BufferedReader reader = new BufferedReader(new FileReader("credentials"));
+			while((credentials = reader.readLine()) != null){
+				count += 1;
+				if(credentials.startsWith(userName)){
+					index = count;
+					break;
+				}
+			}
+			reader.close();
+		}
+		catch(IOException e){}
+		return index;
+	}
+
+	boolean checkPassword(int credsIndex){
+		boolean ret = false;
+		int tries = 3;
+		String tentative = "";
+		String password = "";
+		try{
+			BufferedReader reader = new BufferedReader(new FileReader("credentials"));
+			for(int i = 0; i < credsIndex; i++){
+				password = reader.readLine().substring(userName.length() + 1);
+			}
+			reader.close();
+		}
+		catch(FileNotFoundException e){
+			System.out.println("Credentials file not found");
+		}
+		catch(IOException e){
+			System.out.println("IOException caught in checkPassword()");
+		}
+
+		while(tries > 0){
+			output.println("Please type in your password");
+			try{
+				tentative = input.readLine();
+				if(password.equals(tentative)){
+					ret = true;
+					break;
+				}
+				else{
+					tries -= 1;
+					if(tries > 0){
+						output.println("You have entered the wrong login/password combination. Try again (remaining " + tries + " tries)");
+					}
+					else{
+						output.println("Too many wrong tries");
+					}
+				}
+			}
+			catch(IOException e){
+				System.out.println("IOException caught in checkPassword()");
+			}
+		}
+		return ret;
+	}
+
 	/////////////////////////////
 	// DISCONNECTION HANDLING //
 	///////////////////////////
 
-	public synchronized void disconnect(){
-		sendMessage("Bye " + userName + "!", NBCLIENTSMAX, getThreadId());
+	public synchronized void disconnect(boolean notify){
+		if(notify){
+			sendMessage("Bye " + userName + "!", NBCLIENTSMAX, getThreadId());
+		}
 		try{
 			socket.close();
 			System.out.println("Connection closed");
@@ -97,9 +220,15 @@ public class ServiceChat extends Thread{
 		}
 		popUser();
 		nbClients -= 1;
-		sendMessage(userName + " has left the chat", NBCLIENTSMAX);
+		if(notify){
+			sendMessage(userName + " has left the chat", NBCLIENTSMAX);
+		}
 		running = false;
 		System.out.println(nbClients + " client(s) connected");
+	}
+
+	public synchronized void disconnect(){
+		disconnect(true);
 	}
 
 	void popUser(){
