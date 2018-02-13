@@ -110,7 +110,7 @@ $ java Telnet <host> <port>
 	- [x] A la connexion d'un nouvel arrivant, message "[SERVER] Hello foo!"
 	- [x] Commande pour énumérer les pseudos des utilisateurs en ligne "/list"
 	- [x] Envoi de message personnel "/msg foo Hello world!"
-	- [ ] Authentification par mot de passe : lors de la première connexion d'un pseudo donné, enregistrement côté serveur du mot de passe correspondant pour authentification ultérieure
+	- [x] Authentification par mot de passe : lors de la première connexion d'un pseudo donné, enregistrement côté serveur du mot de passe correspondant pour authentification ultérieure
 - [ ] V3
 	- [x] Utilisation comme client de ClientChat.java, sur la base de Telnet.java
 	- [x] Serveur et port TCP pouvant être indiqués au lancement du serveur en ligne de commande, sinon utilisation de valeurs par défaut ("localhost" et "2222")
