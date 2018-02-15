@@ -26,6 +26,7 @@ public class ServiceChat extends Thread{
 		init();
 		System.out.println(nbClients + " client(s) connected");
 		if(authentication()){
+			usersList[getThreadId()] = userName;
 			String message = "";
 			sendMessage("Welcome to this chat, " + userName + "!", NBCLIENTSMAX, getThreadId());
 			sendMessage(userName + " has joined the chat", NBCLIENTSMAX);
@@ -72,18 +73,20 @@ public class ServiceChat extends Thread{
 		boolean ret = false;
 		int credsIndex = -1;
 		setUserName();
-		if((credsIndex = hasCredentials()) != 0){
-			if(!checkPassword(credsIndex)){
-				disconnect(false);
+		if(userName != null){
+			if((credsIndex = hasCredentials()) != 0){
+				if(!checkPassword(credsIndex)){
+					disconnect(false);
+				}
+				else{
+					ret = true;
+				}
 			}
 			else{
+				sendMessage("You do not have a recorded password attached to your login yet.", NBCLIENTSMAX, getThreadId());
+				setPassword();
 				ret = true;
 			}
-		}
-		else{
-			sendMessage("You do not have a recorded password attached to your login yet.", NBCLIENTSMAX, getThreadId());
-			setPassword();
-			ret = true;
 		}
 		return ret;
 	}
@@ -100,10 +103,10 @@ public class ServiceChat extends Thread{
 				sendMessage("This user name is already being used on the chat... You need to pick another one", NBCLIENTSMAX, getThreadId());
 				setUserName();
 			}
-			usersList[getThreadId()] = userName;
 		}
-		catch (IOException e){
-			System.out.println("IOException caught in setUserName()");
+		catch (Exception e){
+			System.out.println("Exception caught in setUserName()");
+			disconnect(false);
 		}
 	}
 
@@ -122,8 +125,9 @@ public class ServiceChat extends Thread{
 				setPassword();
 			}
 		}
-		catch(IOException e){
-			System.out.println("IOException caught in setPassword()");
+		catch(Exception e){
+			System.out.println("Exception caught in setPassword()");
+			disconnect(false);
 		}
 	}
 
@@ -154,6 +158,9 @@ public class ServiceChat extends Thread{
 			reader.close();
 		}
 		catch(IOException e){}
+		catch(NullPointerException e){
+			disconnect(false);
+		}
 		return index;
 	}
 
@@ -223,6 +230,7 @@ public class ServiceChat extends Thread{
 		}
 		running = false;
 		System.out.println(nbClients + " client(s) connected");
+		this.interrupt();
 	}
 
 	public synchronized void disconnect(){
@@ -294,7 +302,7 @@ public class ServiceChat extends Thread{
 				return;
 			}
 		}
-		sendMessage("User " + destUserName + "does not exist...", NBCLIENTSMAX, getThreadId());
+		sendMessage("User " + destUserName + " does not exist...", NBCLIENTSMAX, getThreadId());
 	}
 
 	/////////////////////////////
