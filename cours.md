@@ -104,7 +104,7 @@ $ java Telnet <host> <port>
 	- [x] A la connexion si serveur pas plein : demande d'un pseudo qui doit être unique (pas 2 connectés avec le même login)
 	- [x] Affichage du nombre d'utilisateurs en ligne à chaque nouveau connecté
 	- [x] Chaque message préfixé du loding de son émetteur "<foo> Hello world!"
-- [ ] V2
+- [x] V2
 	- [x] Commande pour se déconnecter "/quit"
 	- [x] A la deconnexion d'un utilisateur, message "[SERVER] Bye foo!"
 	- [x] A la connexion d'un nouvel arrivant, message "[SERVER] Hello foo!"
